@@ -34,9 +34,8 @@ class Nlp(object):
         for json in SimpleRequestGathering(self.urls).collect():
             save_json_file(self.raw_path, json['fileId'], json)
 
-        self.read_raw()
-
     def read_raw(self):
+        print("\nReading raw corpus...\n")
         self.raws = RawCorpusReader(self.raw_path, r'[\w0-9-#_\.]+\.json')
 
     @property
@@ -47,6 +46,7 @@ class Nlp(object):
         return self._preprocessor
 
     def read_corpus(self):
+        print("\nReading corpus...\n")
         self.corpus = PickledCorpusReader(
             self.tokens_path, r'[a-z0-9-#_\.]+\.pickle', cat_file="cats.txt")
 
@@ -88,18 +88,19 @@ def main():
 
     nlp = Nlp(urls)
 
-    # nlp.gathering()
-    # nlp.read_raw()
-    # nlp.preprocessor.preprocess()
-    # nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
+    nlp.gathering()
+
+    nlp.read_raw()
+
+    nlp.preprocessor.preprocess()
+    nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
 
     nlp.read_corpus()
-    # print(next(nlp.corpus.documents()))
-
-    # nlp.vectorize().vect_frequency()
-    # nlp.vectorize().vect_tf_idf()
-    # nlp.vectorize().vect_tf()
-    # nlp.vectorize().vect_one_hot()
+    
+    nlp.vectorizer.vect_frequency()
+    nlp.vectorizer.vect_tf_idf()
+    nlp.vectorizer.vect_tf()
+    nlp.vectorizer.vect_one_hot()
     nlp.vectorizer.vect_word2vec()
 
 

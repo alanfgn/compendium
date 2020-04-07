@@ -48,6 +48,8 @@ class Preprocessor(object):
         return extract(document, self.functions)
 
     def preprocess(self, target=None, save_fun=save_pickle, extension="pickle", only_parse=False):
+        print("\n\nStart preprocessing %s\n" % extension)
+
         cat_file = []
 
         target = target if target is not None else self.target
@@ -56,6 +58,8 @@ class Preprocessor(object):
             os.makedirs(target)
 
         for fileid in self.corpus.fileids():
+            print("Processing %s ..." % fileid)
+            
             name = self.get_name(fileid) + "." + extension
 
             text = self.parser(next(self.corpus.raws(fileid))['text'])
@@ -68,4 +72,9 @@ class Preprocessor(object):
 
             del document
 
+        print("\nSaving categories file")
+
         self.save_cat_file(target, cat_file)
+
+        print("\nFinishing preprocessing\n")
+

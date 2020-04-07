@@ -6,7 +6,6 @@ from nltk.corpus import mac_morpho
 from nltk.tag import tnt
 import numpy as np
 
-
 def simplify_tag(t):
     if "+" in t:
         return t[t.index("+") + 1:]

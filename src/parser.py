@@ -6,10 +6,10 @@ CONTENT_CLASSES = ['content-media__description']
 
 
 def element_is_dispensable(soup_element):
-    # if 'class' in soup_element.attrs and len(soup_element.attrs['class']) > 0 and set(soup_element.attrs['class']).issubset(CONTENT_CLASSES):
-    #     return True
-    # if 'itemprop' in soup_element.attrs and soup_element.attrs['itemprop'] == 'description':
-    #     return True
+    if 'class' in soup_element.attrs and len(soup_element.attrs['class']) > 0 and set(soup_element.attrs['class']).issubset(CONTENT_CLASSES):
+        return True
+    if 'itemprop' in soup_element.attrs and soup_element.attrs['itemprop'] == 'description':
+        return True
     return False
 
 

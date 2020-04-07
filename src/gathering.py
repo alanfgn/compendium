@@ -7,8 +7,11 @@ class SimpleRequestGathering():
         self.urls =urls
 
     def collect(self):
+        print("\nStart Collect\n")
+        
         for labels, url in self.urls:
-            
+            print("Simple Request Collect: %s" % url)
+
             request = requests.get(url)
             _, domain, path = slice_url(url)
             
@@ -18,3 +21,5 @@ class SimpleRequestGathering():
                 "labels": labels,
                 "text" : request.text 
             }
+
+        print("\nFinishing Collect\n")

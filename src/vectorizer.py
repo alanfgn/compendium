@@ -33,34 +33,53 @@ class Vectorizer(object):
         return self.clean(self.corpus.words(fileids))
 
     def vect_frequency(self):
+        print("\nStart Vectorizing frequency\n")
+
         def frequency(fileid):
             fre = FreqDist(self.clean_data(fileid))
             return dict(fre.items())
 
         for fileid in self.corpus.fileids():
+            print("%s ..." % fileid)
+
             self.save("frequency", frequency(fileid), fileid)
 
+        print("\nFinish Vectorizing frequency\n")
+
+
+
     def vect_tf_idf(self):
+        print("\nStart tf-idf frequency\n")
+
         corpus = {fileid: list(self.clean_data(fileid))
                   for fileid in self.corpus.fileids()}
 
         texts = TextCollection(list(corpus.values()))
 
         for fileid, doc in corpus.items():
+            print("%s ..." % fileid)
+
             document = {
                 term: texts.tf_idf(term, doc)
                 for term in doc
             }
 
             self.save("tf-idf", document, fileid)
+        
+        print("\nFinish tf-idf frequency\n")
+
 
     def vect_tf(self):
+        print("\nStart tf frequency\n")
+
         corpus = {fileid: list(self.clean_data(fileid))
                   for fileid in self.corpus.fileids()}
 
         texts = TextCollection(list(corpus.values()))
 
         for fileid, doc in corpus.items():
+            print("%s ..." % fileid)
+
             document = {
                 term: texts.tf(term, doc)
                 for term in doc
@@ -68,7 +87,11 @@ class Vectorizer(object):
 
             self.save("tf", document, fileid)
 
+        print("\nFinish tf frequency\n")
+
+
     def vect_word2vec(self):
+        print("\nStart word2vec frequency\n")
 
         def word2vec(fileid):
             document = [list(self.clean([token[0] for token in sent]))
@@ -77,10 +100,17 @@ class Vectorizer(object):
             return Word2Vec(document, min_count=1, size= 50, workers=3, window =3, sg = 1)
 
         for fileid in self.corpus.fileids():
+            print("%s ..." % fileid)
+
             self.save("word2vec", word2vec(fileid), fileid)
+
+        print("\nFinish word2vec frequency\n")
+
 
 
     def vect_one_hot(self):
+        print("\nStart one hot frequency\n")
+
         def one_hot(fileid):
             return {
                 token: True
@@ -88,7 +118,12 @@ class Vectorizer(object):
             }
 
         for fileid in self.corpus.fileids():
+            print("%s ..." % fileid)
+
             self.save("one_hot", one_hot(fileid), fileid)
+
+        print("\nFinish one hot frequency\n")
+
 
     def save(self, method, vector, fileid):
 
