@@ -18,3 +18,7 @@ def save_json_file(base, name, file):
 def save_pickle(path, document):
     with open(path, 'wb') as file:
         pickle.dump(document, file, pickle.HIGHEST_PROTOCOL)
+
+def save_txt(path, document):    
+    with open(path, 'w+') as file:
+        file.write(document)

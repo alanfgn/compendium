@@ -4,7 +4,6 @@ g1.globo.com#-pr-parana-noticia-2019-11-08-lula-deixa-a-prisao-em-curitiba-apos-
 g1.globo.com#-sp-sao-paulo-noticia-lula-se-entrega-a-pf-para-cumprir-pena-por-corrupcao-e-lavagem-de-dinheiro.ghtml.pickle lula-preso g1
 istoe.com.br#-rojoes-sao-disparados-por-todo-o-brasil-apos-prisao-de-lula-.pickle lula-preso istoe
 metropoles.com#-brasil-lula-preso-os-bastidores-da-historica-prisao-do-ex-presidente.pickle lula-preso metropoles
-noticias.r7.com#-brasil-a-prisao-de-lula.pickle lula-preso r7
 noticias.uol.com.br#-politica-ultimas-noticias-2018-04-07-lula-prisao.htm.pickle lula-preso uol
 politica.estadao.com.br#-blogs-fausto-macedo-lula-deixa-sindicato-para-a-prisao-da-lava-jato-.pickle lula-preso estadao
 theintercept.com#-2018-04-07-a-prisao-de-lula-e-politica-.pickle lula-preso the-intercept

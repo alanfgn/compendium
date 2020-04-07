@@ -3,8 +3,7 @@ from gathering import SimpleRequestGathering
 from preprocessor import Preprocessor
 from vectorizer import Vectorizer
 from readers import RawCorpusReader, PickledCorpusReader
-from utils import save_json_file
-
+from utils import save_json_file, save_txt
 
 class Nlp(object):
 
@@ -27,8 +26,9 @@ class Nlp(object):
 
         self.raws = None
         self.corpus = None
-
-        self.vectorizer = None
+        
+        self._preprocessor = None
+        self._vectorizer = None
 
     def gathering(self):
         for json in SimpleRequestGathering(self.urls).collect():
@@ -39,19 +39,24 @@ class Nlp(object):
     def read_raw(self):
         self.raws = RawCorpusReader(self.raw_path, r'[\w0-9-#_\.]+\.json')
 
-    def preprocess(self):
-        Preprocessor(self.tokens_path).preprocess(self.raws)
+    @property
+    def preprocessor(self):
+        if self._preprocessor is None:
+            self._preprocessor = Preprocessor(self.raws, self.tokens_path)
+        
+        return self._preprocessor
 
     def read_corpus(self):
         self.corpus = PickledCorpusReader(
             self.tokens_path, r'[a-z0-9-#_\.]+\.pickle', cat_file="cats.txt")
 
-    def vectorize(self):
-        if self.vectorizer is None:
-            self.vectorizer = Vectorizer(self.corpus, self.vectorization_path,
+    @property
+    def vectorizer(self):
+        if self._vectorizer is None:
+            self._vectorizer = Vectorizer(self.corpus, self.vectorization_path,
                             cat_file_path=os.path.join(self.tokens_path, "cats.txt"))
         
-        return self.vectorizer
+        return self._vectorizer
 
 
 def main():
@@ -71,8 +76,6 @@ def main():
          'https://theintercept.com/2018/04/07/a-prisao-de-lula-e-politica/'),
         (["lula-preso", "uol"],
          'https://noticias.uol.com.br/politica/ultimas-noticias/2018/04/07/lula-prisao.htm'),
-        (["lula-preso", "r7"],
-         'https://noticias.r7.com/brasil/a-prisao-de-lula'),
         (["lula-preso", "istoe"],
          'https://istoe.com.br/rojoes-sao-disparados-por-todo-o-brasil-apos-prisao-de-lula/'),
         (["lula-preso", "metropoles"],
@@ -85,16 +88,19 @@ def main():
 
     nlp = Nlp(urls)
 
-    nlp.gathering()
-    nlp.read_raw()
-    nlp.preprocess()
+    # nlp.gathering()
+    # nlp.read_raw()
+    # nlp.preprocessor.preprocess()
+    # nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
+
     nlp.read_corpus()
+    # print(next(nlp.corpus.documents()))
 
-    nlp.vectorize().vect_frequency()
-    nlp.vectorize().vect_tf_idf()
-    nlp.vectorize().vect_tf()
-    nlp.vectorize().vect_one_hot()
-
+    # nlp.vectorize().vect_frequency()
+    # nlp.vectorize().vect_tf_idf()
+    # nlp.vectorize().vect_tf()
+    # nlp.vectorize().vect_one_hot()
+    nlp.vectorizer.vect_word2vec()
 
 
 if __name__ == "__main__":

@@ -7,6 +7,8 @@ import pickle
 import unicodedata
 from nltk import FreqDist
 from nltk.text import TextCollection
+from gensim.models import Word2Vec
+from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 
 from readers import PickledCorpusReader
 
@@ -19,13 +21,16 @@ class Vectorizer(object):
         self.cat_file_path = cat_file_path
         self.stopwords = stopwords
 
-    def clean_data(self, fileids):
-        for word in self.corpus.words(fileids):
+    def clean(self, words):
+        for word in words:
             if word.lower() in self.stopwords:
                 continue
             if all(unicodedata.category(char).startswith('P') for char in word):
                 continue
             yield word
+
+    def clean_data(self, fileids):
+        return self.clean(self.corpus.words(fileids))
 
     def vect_frequency(self):
         def frequency(fileid):
@@ -63,6 +68,18 @@ class Vectorizer(object):
 
             self.save("tf", document, fileid)
 
+    def vect_word2vec(self):
+
+        def word2vec(fileid):
+            document = [list(self.clean([token[0] for token in sent]))
+                        for sent in self.corpus.sentences(fileid)]
+
+            return Word2Vec(document, min_count=1, size= 50, workers=3, window =3, sg = 1)
+
+        for fileid in self.corpus.fileids():
+            self.save("word2vec", word2vec(fileid), fileid)
+
+
     def vect_one_hot(self):
         def one_hot(fileid):
             return {
@@ -86,7 +103,7 @@ class Vectorizer(object):
         with open(target, 'wb') as f:
             pickle.dump(vector, f, pickle.HIGHEST_PROTOCOL)
 
-        line = fileid + " " +" ".join(self.corpus.categories(fileid)) + "\n"
+        line = fileid + " " + " ".join(self.corpus.categories(fileid)) + "\n"
         cat_file_path = os.path.join(parent, "cats.txt")
 
         with open(cat_file_path, "a") as f:
