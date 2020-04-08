@@ -27,7 +27,7 @@ class Vectorizer(object):
                 continue
             if all(unicodedata.category(char).startswith('P') for char in word):
                 continue
-            yield word
+            yield word.lower()
 
     def clean_data(self, fileids):
         return self.clean(self.corpus.words(fileids))

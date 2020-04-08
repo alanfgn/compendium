@@ -2,8 +2,10 @@ import os
 from gathering import SimpleRequestGathering
 from preprocessor import Preprocessor
 from vectorizer import Vectorizer
-from readers import RawCorpusReader, PickledCorpusReader
+from readers import RawCorpusReader, PickledCorpusReader, PickledVectorizeCorpusReader
 from utils import save_json_file, save_txt
+from visualization import tsne_scatter_plot
+
 
 class Nlp(object):
 
@@ -26,7 +28,7 @@ class Nlp(object):
 
         self.raws = None
         self.corpus = None
-        
+
         self._preprocessor = None
         self._vectorizer = None
 
@@ -42,67 +44,97 @@ class Nlp(object):
     def preprocessor(self):
         if self._preprocessor is None:
             self._preprocessor = Preprocessor(self.raws, self.tokens_path)
-        
+
         return self._preprocessor
 
     def read_corpus(self):
         print("\nReading corpus...\n")
-        self.corpus = PickledCorpusReader(
-            self.tokens_path, r'[a-z0-9-#_\.]+\.pickle', cat_file="cats.txt")
+        self.corpus = PickledCorpusReader(self.tokens_path)
 
     @property
     def vectorizer(self):
         if self._vectorizer is None:
             self._vectorizer = Vectorizer(self.corpus, self.vectorization_path,
-                            cat_file_path=os.path.join(self.tokens_path, "cats.txt"))
-        
+                                          cat_file_path=os.path.join(self.tokens_path, "cats.txt"))
+
         return self._vectorizer
 
+    def visualize(self, path, function, directory):
 
-def main():
-    urls = [
-        (["lula-livre", "folha"], 'https://www1.folha.uol.com.br/poder/2019/11/ex-presidente-lula-e-solto-apos-580-dias-preso-na-policia-federal-em-curitiba.shtml'),
-        (["lula-livre", "veja"],
-         'https://veja.abril.com.br/politica/lula-deixa-cadeia-apos-580-dias-veja-como-foi/'),
-        (["lula-livre", "g1"], 'https://g1.globo.com/pr/parana/noticia/2019/11/08/lula-deixa-a-prisao-em-curitiba-apos-decisao-do-stf.ghtml'),
-        (["lula-preso", "folha"],
-         'https://www1.folha.uol.com.br/poder/2018/04/lula-e-preso.shtml'),
-        (["lula-preso", "veja"],
-         'https://veja.abril.com.br/politica/lula-e-preso-ex-presidente-se-entrega-a-policia-federal/'),
-        (["lula-preso", "g1"], 'https://g1.globo.com/sp/sao-paulo/noticia/lula-se-entrega-a-pf-para-cumprir-pena-por-corrupcao-e-lavagem-de-dinheiro.ghtml'),
-        (["lula-preso", "elpais"],
-         'https://brasil.elpais.com/brasil/2018/04/05/politica/1522917041_563602.html'),
-        (["lula-preso", "the-intercept"],
-         'https://theintercept.com/2018/04/07/a-prisao-de-lula-e-politica/'),
-        (["lula-preso", "uol"],
-         'https://noticias.uol.com.br/politica/ultimas-noticias/2018/04/07/lula-prisao.htm'),
-        (["lula-preso", "istoe"],
-         'https://istoe.com.br/rojoes-sao-disparados-por-todo-o-brasil-apos-prisao-de-lula/'),
-        (["lula-preso", "metropoles"],
-         'https://www.metropoles.com/brasil/lula-preso-os-bastidores-da-historica-prisao-do-ex-presidente'),
-        (["lula-preso", "estadao"],
-         'https://politica.estadao.com.br/blogs/fausto-macedo/lula-deixa-sindicato-para-a-prisao-da-lava-jato/'),
-        (["lula-preso", "agenciabrasil"],
-         'https://agenciabrasil.ebc.com.br/internacional/noticia/2018-04/imprensa-internacional-destaca-prisao-de-lula')
-    ]
+        vectors = PickledVectorizeCorpusReader(path)
 
-    nlp = Nlp(urls)
+        target = os.path.join(self.docs_path, directory)
+        if not os.path.exists(target):
+            os.makedirs(target)
 
-    nlp.gathering()
-
-    nlp.read_raw()
-
-    nlp.preprocessor.preprocess()
-    nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
-
-    nlp.read_corpus()
-    
-    nlp.vectorizer.vect_frequency()
-    nlp.vectorizer.vect_tf_idf()
-    nlp.vectorizer.vect_tf()
-    nlp.vectorizer.vect_one_hot()
-    nlp.vectorizer.vect_word2vec()
+        for name, plot in function(vectors):
+            plot.savefig(os.path.join(target, name))
 
 
-if __name__ == "__main__":
-    main()
+# def main():
+urls = [
+    (["lula-livre", "folha"], 'https://www1.folha.uol.com.br/poder/2019/11/ex-presidente-lula-e-solto-apos-580-dias-preso-na-policia-federal-em-curitiba.shtml'),
+    (["lula-livre", "veja"],
+        'https://veja.abril.com.br/politica/lula-deixa-cadeia-apos-580-dias-veja-como-foi/'),
+    (["lula-livre", "g1"], 'https://g1.globo.com/pr/parana/noticia/2019/11/08/lula-deixa-a-prisao-em-curitiba-apos-decisao-do-stf.ghtml'),
+    (["lula-preso", "folha"],
+        'https://www1.folha.uol.com.br/poder/2018/04/lula-e-preso.shtml'),
+    (["lula-preso", "veja"],
+        'https://veja.abril.com.br/politica/lula-e-preso-ex-presidente-se-entrega-a-policia-federal/'),
+    (["lula-preso", "g1"], 'https://g1.globo.com/sp/sao-paulo/noticia/lula-se-entrega-a-pf-para-cumprir-pena-por-corrupcao-e-lavagem-de-dinheiro.ghtml'),
+    (["lula-preso", "elpais"],
+        'https://brasil.elpais.com/brasil/2018/04/05/politica/1522917041_563602.html'),
+    (["lula-preso", "the-intercept"],
+        'https://theintercept.com/2018/04/07/a-prisao-de-lula-e-politica/'),
+    (["lula-preso", "uol"],
+        'https://noticias.uol.com.br/politica/ultimas-noticias/2018/04/07/lula-prisao.htm'),
+    (["lula-preso", "istoe"],
+        'https://istoe.com.br/rojoes-sao-disparados-por-todo-o-brasil-apos-prisao-de-lula/'),
+    (["lula-preso", "metropoles"],
+        'https://www.metropoles.com/brasil/lula-preso-os-bastidores-da-historica-prisao-do-ex-presidente'),
+    (["lula-preso", "estadao"],
+        'https://politica.estadao.com.br/blogs/fausto-macedo/lula-deixa-sindicato-para-a-prisao-da-lava-jato/'),
+    (["lula-preso", "agenciabrasil"],
+        'https://agenciabrasil.ebc.com.br/internacional/noticia/2018-04/imprensa-internacional-destaca-prisao-de-lula')
+]
+
+nlp = Nlp(urls)
+
+# nlp.gathering()
+
+# nlp.read_raw()
+
+# nlp.preprocessor.preprocess()
+# nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
+
+nlp.read_corpus()
+
+# nlp.vectorizer.vect_frequency()
+# nlp.vectorizer.vect_tf_idf()
+# nlp.vectorizer.vect_tf()
+# nlp.vectorizer.vect_one_hot()
+# nlp.vectorizer.vect_word2vec()
+
+
+def vector_word2vec_lula(models):
+    for fileid in models.fileids():
+        name, _ = os.path.splitext(os.path.basename(fileid))
+
+        vector = next(models.vectors(fileid)) 
+        yield name + ".png", tsne_scatter_plot(vector, "Lula")
+
+
+def vector_word2vec_moro(models):
+    for fileid in models.fileids():
+        name, _ = os.path.splitext(os.path.basename(fileid))
+
+        vector = next(models.vectors(fileid)) 
+        yield name + ".png", tsne_scatter_plot(vector, "Moro")
+
+
+nlp.visualize(os.path.join(nlp.vectorization_path, 'word2vec'), vector_word2vec_lula, "word-2-vec-Lula")
+# nlp.visualize(os.path.join(nlp.vectorization_path, 'word2vec'), vector_word2vec_moro, "word-2-vec-moro")
+
+
+# if __name__ == "__main__":
+#     main()

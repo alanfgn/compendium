@@ -5,7 +5,6 @@ from parser import html_cleaner
 from lexical import paragraph_segmentation, sentence_segmentation, word_segmentation, part_of_speech_tagger
 from utils import save_pickle
 
-
 class Preprocessor(object):
 
     def __init__(
