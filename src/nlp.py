@@ -4,12 +4,14 @@ from preprocessor import Preprocessor
 from vectorizer import Vectorizer
 from readers import RawCorpusReader, PickledCorpusReader, PickledVectorizeCorpusReader
 from utils import save_json_file, save_txt
-from visualization import tsne_scatter_plot
+from visualization import tsne_scatter_plot, bar_plot
 
 
 class Nlp(object):
 
     def __init__(self, urls, path="./data", **kwargs):
+        
+        print("Make directories...")
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -69,6 +71,7 @@ class Nlp(object):
 
         for name, plot in function(vectors):
             plot.savefig(os.path.join(target, name))
+            plot.clf()
 
 
 # def main():
@@ -101,13 +104,11 @@ urls = [
 nlp = Nlp(urls)
 
 # nlp.gathering()
-
 # nlp.read_raw()
-
 # nlp.preprocessor.preprocess()
 # nlp.preprocessor.preprocess(target='./data/corpus', save_fun=save_txt, extension="txt", only_parse=True)
 
-nlp.read_corpus()
+# nlp.read_corpus()
 
 # nlp.vectorizer.vect_frequency()
 # nlp.vectorizer.vect_tf_idf()
@@ -120,21 +121,30 @@ def vector_word2vec_lula(models):
     for fileid in models.fileids():
         name, _ = os.path.splitext(os.path.basename(fileid))
 
-        vector = next(models.vectors(fileid)) 
-        yield name + ".png", tsne_scatter_plot(vector, "Lula")
+        vector = next(models.vectors(fileid))
+        yield name + ".png", tsne_scatter_plot(vector, "lula")
 
 
 def vector_word2vec_moro(models):
     for fileid in models.fileids():
         name, _ = os.path.splitext(os.path.basename(fileid))
 
-        vector = next(models.vectors(fileid)) 
-        yield name + ".png", tsne_scatter_plot(vector, "Moro")
+        vector = next(models.vectors(fileid))
+        yield name + ".png", tsne_scatter_plot(vector, "moro")
 
 
-nlp.visualize(os.path.join(nlp.vectorization_path, 'word2vec'), vector_word2vec_lula, "word-2-vec-Lula")
-# nlp.visualize(os.path.join(nlp.vectorization_path, 'word2vec'), vector_word2vec_moro, "word-2-vec-moro")
+def five_tfidf(models):
+    for fileid in models.fileids():
 
+        name, _ = os.path.splitext(os.path.basename(fileid))
+        vector = next(models.vectors(fileid))
+
+        yield name + ".png", bar_plot(vector, name, num=5)
+
+
+# nlp.visualize(os.path.join(nlp.vectorization_path, 'word2vec'), vector_word2vec_lula, "word-2-vec-Lula")
+# nlp.visualize(os.path.join(nlp.vectorization_path, 'tf-idf'), five_tfidf, "five-tf-idf" )
+nlp.visualize(os.path.join(nlp.vectorization_path, 'tf'), five_tfidf, "five-tf" )
 
 # if __name__ == "__main__":
 #     main()

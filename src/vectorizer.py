@@ -12,6 +12,7 @@ from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 
 from readers import PickledCorpusReader
 
+CLEAN_UNICODE_CATEGORIES = ['Pc', 'Pd', 'Pe', 'Pf', 'Pi', 'Po', 'Ps', 'Sk', 'So']
 
 class Vectorizer(object):
 
@@ -25,7 +26,7 @@ class Vectorizer(object):
         for word in words:
             if word.lower() in self.stopwords:
                 continue
-            if all(unicodedata.category(char).startswith('P') for char in word):
+            if all(unicodedata.category(char) in CLEAN_UNICODE_CATEGORIES for char in word):
                 continue
             yield word.lower()
 

@@ -1,10 +1,11 @@
 import nltk
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, MWETokenizer
 from nltk import DefaultTagger, UnigramTagger, BigramTagger, TrigramTagger
 from nltk.corpus import floresta
 from nltk.corpus import mac_morpho
 from nltk.tag import tnt
 import numpy as np
+
 
 def simplify_tag(t):
     if "+" in t:
@@ -33,18 +34,34 @@ TNT_TAGGER.train(train_tsents)
 def paragraph_segmentation(text):
     return text.split("\n\n")
 
-
 def sentence_segmentation(text):
     sent_tokenizer = nltk.data.load('tokenizers/punkt/portuguese.pickle')
     return sent_tokenizer.tokenize(text)
 
-
 def word_segmentation(text):
     return word_tokenize(text, language="portuguese")
 
+def mwe_tokenizer(text, multi_words_tokens):
+    mwe_tk = MWETokenizer(multi_words_tokens)
+    return mwe_tk.tokenize(text)
 
-def part_of_speech_tagger(text, tagger=TNT_TAGGER):
-    return tagger.tag(word_segmentation(text))
+def pt_mwe_tokenier(text):
+    multi_words_tokens = [('Distrito', 'Federal'), ('Espírito', 'Santo'), ('Mato', 'Grosso'), 
+    ('Mato', 'Grosso', 'do', 'Sul'), ('Minas', 'Gerais'), ('Rio' 'de' 'Janeiro'), ('Rio', 'Branco'), 
+    ('São', 'Luís'), ('Belo', 'Horizonte'), ('Rio', 'Grande', 'do', 'Norte'),
+    ('Rio', 'Grande', 'do', 'Sul'), ('São', 'Paulo'), ('Estados', 'Unidos'), ('Reino', 'Unido'), ('Supremo' 'Tribunal' 'Federal'), 
+    ('Ficha', 'Limpa'), ('Santa', 'Cândida')]
+
+    return mwe_tokenizer(text, multi_words_tokens)
+
+DEFAULT_MWE_TOKENIER = pt_mwe_tokenier
+
+def part_of_speech_tagger(text, word_segmentation=word_segmentation, tagger=TNT_TAGGER, mwe_tokenizer=DEFAULT_MWE_TOKENIER):
+    
+    tokens = word_segmentation(text)
+    tokens = mwe_tokenizer(tokens)
+    
+    return tagger.tag(tokens)
 
 
 def main():

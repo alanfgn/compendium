@@ -1,6 +1,8 @@
+import os
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
+import itertools
  
 import seaborn as sns
 sns.set_style("darkgrid")
@@ -65,5 +67,13 @@ def tsne_scatter_plot(model, word):
 
     return plt
 
-    
-    
+
+def bar_plot(vector, title, num=5):
+    tfidf = {k: v for k, v in sorted(vector.items(), reverse=True, key=lambda item: item[1])}
+    tfidf = dict(itertools.islice(tfidf.items(), num))
+
+    plt.bar(list(tfidf.keys()), list(tfidf.values()), align='center', alpha=0.5)
+    plt.title(title)
+    return plt
+
+
